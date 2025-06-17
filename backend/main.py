@@ -11,21 +11,19 @@ from datetime import datetime
 app = FastAPI(title="Cơm Bà Giang API")
 
 # Enable CORS for frontend
+# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",  # Vue dev server
-        "http://127.0.0.1:5173",  # Alternative localhost
-        "http://localhost:3000",  # Alternative port
-        "http://127.0.0.1:3000",  # Alternative port
-        "http://localhost:8080",  # Another common port
-        "http://127.0.0.1:8080"   # Another common port
-    ],
+    allow_origins=["*"],  # Production nên chỉ định domain cụ thể
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["*"]
 )
+
+# API routes
+@app.get("/api/health")
+async def health_check():
+    return {"status": "healthy"}
 
 # Initialize Excel handler
 excel_handler = ExcelHandler()
