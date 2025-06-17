@@ -122,11 +122,6 @@ class FeedbackRequest(BaseModel):
     rating: int = None  # 1-5 stars, optional
     category: str = "general"  # general, food, service, delivery
 
-# ============ BASIC ENDPOINTS ============
-@app.get("/")
-async def root():
-    return {"message": "Cơm Bà Giang API is running!"}
-
 # ============ AUTHENTICATION ENDPOINTS ============
 @app.post("/auth/login")
 async def login(request: LoginRequest):
@@ -1123,36 +1118,37 @@ async def options_group_payments(group_identifier: str):
 async def options_group_invite(group_id: int):
     return {"message": "OK"}
 
-# ============ SERVER STARTUP ============
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-
+# =============
+# SERVE FRONTEND STATIC FILES
+# =============
 static_dir = Path(__file__).parent / "static"
 
-if static_dir.exists():
-    # Mount static assets (CSS, JS, images)
+if static_dir.exists() and (static_dir / "index.html").exists():
+    # Mount assets folder
     assets_dir = static_dir / "assets"
     if assets_dir.exists():
         app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
     
-    # Serve index.html cho tất cả non-API routes (SPA routing)
+    # Root route - serve index.html
+    @app.get("/")
+    async def serve_frontend_root():
+        return FileResponse(str(static_dir / "index.html"))
+    
+    # Catch-all route cho SPA routing
     @app.get("/{full_path:path}")
-    async def serve_frontend(full_path: str):
-        # Nếu request bắt đầu với "api/", không serve frontend
+    async def serve_frontend_catchall(full_path: str):
+        # Skip API routes
         if full_path.startswith("api/"):
             return {"error": "API endpoint not found"}
         
-        # Serve index.html cho mọi route khác
-        index_file = static_dir / "index.html"
-        if index_file.exists():
-            return FileResponse(str(index_file))
-        else:
-            return {"error": "Frontend index.html not found"}
+        # Serve index.html cho tất cả routes khác
+        return FileResponse(str(static_dir / "index.html"))
 else:
     @app.get("/")
     async def no_frontend():
         return {
-            "error": "Frontend not built", 
-            "message": "Static files not found. Check build process."
+            "error": "Static files not found", 
+            "message": "Check build process",
+            "static_dir": str(static_dir),
+            "exists": static_dir.exists()
         }
