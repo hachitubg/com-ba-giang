@@ -33,7 +33,7 @@ coverage
 .env
 .env.local
 .env.*.local
-.env.production
+# .env.production
 
 # Development environment is OK to commit
 # .env.development should be committed for team setup

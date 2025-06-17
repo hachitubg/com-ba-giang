@@ -270,7 +270,7 @@ export default {
       if (!this.currentUser.id) return;
       
       try {
-        const response = await fetch(`http://127.0.0.1:8000/users/${this.currentUser.id}/groups`);
+        const response = await fetch(`${API_BASE_URL}/users/${this.currentUser.id}/groups`);
         const result = await response.json();
         
         this.currentUser.groups = result.groups;
@@ -289,7 +289,7 @@ export default {
       if (!this.currentUser.id) return;
 
       try {
-        const response = await fetch(`http://127.0.0.1:8000/users/${this.currentUser.id}/info`);
+        const response = await fetch(`${API_BASE_URL}/users/${this.currentUser.id}/info`);
         const result = await response.json();
 
         if (result.success) {
@@ -645,7 +645,7 @@ export default {
 
     async goToGroupManagement(group) {
       try {
-        const response = await fetch(`http://127.0.0.1:8000/groups/${encodeURIComponent(group.name)}/members`);
+        const response = await fetch(`${API_BASE_URL}/groups/${encodeURIComponent(group.name)}/members`);
         const result = await response.json();
         
         let actualGroupId = null;
@@ -756,7 +756,7 @@ export default {
       }
       
       try {
-        const response = await fetch(`http://127.0.0.1:8000/orders/history/${this.currentUser.id}`);
+        const response = await fetch(`${API_BASE_URL}/orders/history/${this.currentUser.id}`);
         const result = await response.json();
         
         this.orderHistory = result.orders || [];
@@ -835,7 +835,7 @@ export default {
 
       if (confirm('Xác nhận lưu thay đổi đơn hàng?')) {
         try {
-          const response = await fetch(`http://127.0.0.1:8000/orders/${this.editingOrder.id}/edit`, {
+          const response = await fetch(`${API_BASE_URL}/orders/${this.editingOrder.id}/edit`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -876,7 +876,7 @@ export default {
     async cancelOrder(order) {
       if (confirm(`Bạn có chắc muốn hủy đơn #${order.id}?`)) {
         try {
-          const response = await fetch(`http://127.0.0.1:8000/orders/${order.id}/cancel`, {
+          const response = await fetch(`${API_BASE_URL}/orders/${order.id}/cancel`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -923,7 +923,7 @@ export default {
 
     async loadPaymentSummary() {
       try {
-        const response = await fetch(`http://127.0.0.1:8000/payments/summary/${this.currentUser.id}?period=${this.paymentPeriod}`);
+        const response = await fetch(`${API_BASE_URL}/payments/summary/${this.currentUser.id}?period=${this.paymentPeriod}`);
         const result = await response.json();
         
         this.paymentSummary = {
@@ -969,7 +969,7 @@ export default {
       } else {
         if (confirm(`Xác nhận đã thanh toán ${this.paymentSummary.remaining_amount.toLocaleString()} VNĐ bằng cách khác?`)) {
           try {
-            const response = await fetch(`http://127.0.0.1:8000/payments/mark-paid/${this.currentUser.id}`, {
+            const response = await fetch(`${API_BASE_URL}/payments/mark-paid/${this.currentUser.id}`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -996,7 +996,7 @@ export default {
     async markManualPayment() {
       if (confirm(`Xác nhận đã thanh toán ${this.paymentSummary.remaining_amount.toLocaleString()} VNĐ cho ${this.paymentSummary.period}?`)) {
         try {
-          const response = await fetch(`http://127.0.0.1:8000/payments/mark-paid/${this.currentUser.id}`, {
+          const response = await fetch(`${API_BASE_URL}/payments/mark-paid/${this.currentUser.id}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -1135,7 +1135,7 @@ export default {
 
       if (confirm('Bạn có chắc muốn hủy thanh toán này?')) {
         try {
-          const response = await fetch(`http://127.0.0.1:8000/payments/cancel-payos/${this.payosPaymentData.order_code}?user_id=${this.currentUser.id}`, {
+          const response = await fetch(`${API_BASE_URL}/payments/cancel-payos/${this.payosPaymentData.order_code}?user_id=${this.currentUser.id}`, {
             method: 'POST'
           });
 
@@ -1162,7 +1162,7 @@ export default {
       
       this.payosStatusCheckInterval = setInterval(async () => {
         try {
-          const response = await fetch(`http://127.0.0.1:8000/payments/payos-status/${this.payosPaymentData.order_code}`);
+          const response = await fetch(`${API_BASE_URL}/payments/payos-status/${this.payosPaymentData.order_code}`);
           const result = await response.json();
 
           if (result.success) {
@@ -1321,7 +1321,7 @@ export default {
       if (!this.currentUser.id) return;
 
       try {
-        const response = await fetch(`http://127.0.0.1:8000/payments/payos-history/${this.currentUser.id}`);
+        const response = await fetch(`${API_BASE_URL}/payments/payos-history/${this.currentUser.id}`);
         const result = await response.json();
 
         if (result.success) {
@@ -1343,7 +1343,7 @@ export default {
       this.isUpdatingUserInfo = true;
 
       try {
-        const response = await fetch(`http://127.0.0.1:8000/users/${this.currentUser.id}/info`, {
+        const response = await fetch(`${API_BASE_URL}/users/${this.currentUser.id}/info`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
