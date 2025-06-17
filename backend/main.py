@@ -6,6 +6,9 @@ import random
 import string
 import json
 from datetime import datetime
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 # ============ APP SETUP ============
 app = FastAPI(title="Cơm Bà Giang API")
@@ -19,6 +22,20 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# API Deploy check
+@app.get("/api/health")
+async def health_check():
+    return {"status": "healthy", "message": "Backend API is working!"}
+
+@app.get("/api/debug")
+async def debug_static():
+    static_dir = Path(__file__).parent / "static"
+    return {
+        "static_exists": static_dir.exists(),
+        "static_path": str(static_dir),
+        "files": [f.name for f in static_dir.iterdir()] if static_dir.exists() else []
+    }
 
 # API routes
 @app.get("/api/health")
@@ -1110,3 +1127,32 @@ async def options_group_invite(group_id: int):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+static_dir = Path(__file__).parent / "static"
+
+if static_dir.exists():
+    # Mount static assets (CSS, JS, images)
+    assets_dir = static_dir / "assets"
+    if assets_dir.exists():
+        app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
+    
+    # Serve index.html cho tất cả non-API routes (SPA routing)
+    @app.get("/{full_path:path}")
+    async def serve_frontend(full_path: str):
+        # Nếu request bắt đầu với "api/", không serve frontend
+        if full_path.startswith("api/"):
+            return {"error": "API endpoint not found"}
+        
+        # Serve index.html cho mọi route khác
+        index_file = static_dir / "index.html"
+        if index_file.exists():
+            return FileResponse(str(index_file))
+        else:
+            return {"error": "Frontend index.html not found"}
+else:
+    @app.get("/")
+    async def no_frontend():
+        return {
+            "error": "Frontend not built", 
+            "message": "Static files not found. Check build process."
+        }

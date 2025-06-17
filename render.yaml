@@ -4,10 +4,24 @@ services:
     env: python
     plan: free
     buildCommand: |
-      cd frontend && npm install && npm run build &&
+      echo "=== Starting build process ===" &&
+      cd frontend &&
+      echo "=== Installing frontend dependencies ===" &&
+      npm install &&
+      echo "=== Building frontend ===" &&
+      npm run build &&
+      echo "=== Frontend build completed ===" &&
+      ls -la dist/ &&
+      echo "=== Creating backend/static directory ===" &&
       mkdir -p ../backend/static &&
+      echo "=== Copying frontend files ===" &&
       cp -r dist/* ../backend/static/ &&
-      cd ../backend && pip install -r requirements.txt
+      echo "=== Verifying copied files ===" &&
+      ls -la ../backend/static/ &&
+      echo "=== Installing backend dependencies ===" &&
+      cd ../backend &&
+      pip install -r requirements.txt &&
+      echo "=== Build process completed ==="
     startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
