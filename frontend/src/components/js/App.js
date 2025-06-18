@@ -97,7 +97,8 @@ export default {
       editOrderData: {
         meal_type: '',
         quantity: 1,
-        note: ''
+        note: '',
+        order_type: 'personal'
       },
 
       // PayOS Payment
@@ -433,6 +434,13 @@ export default {
 
     // ============ MODAL & UI CONTROLS ============
     openOrderModal() {
+      // Thêm logic set giá trị mặc định cho orderType
+      if (this.currentUser.groups && this.currentUser.groups.length > 0) {
+        // Nếu user có nhóm, set nhóm đầu tiên làm mặc định
+        this.orderType = this.currentUser.groups[0].name;
+      } else {
+        this.orderType = 'personal';
+      }
       this.showOrderModal = true;
     },
 
@@ -486,7 +494,8 @@ export default {
       this.editOrderData = {
         meal_type: '',
         quantity: 1,
-        note: ''
+        note: '',
+        order_type: 'personal'
       };
     },
 
@@ -805,7 +814,8 @@ export default {
       this.editOrderData = {
         meal_type: order.meal_type,
         quantity: order.quantity,
-        note: order.note || ''
+        note: order.note || '',
+        order_type: order.group_id || 'personal'
       };
       this.showEditOrderModal = true;
     },
@@ -825,7 +835,8 @@ export default {
       const hasChanges = (
         this.editOrderData.meal_type !== this.editingOrder.meal_type ||
         this.editOrderData.quantity !== this.editingOrder.quantity ||
-        this.editOrderData.note !== (this.editingOrder.note || '')
+        this.editOrderData.note !== (this.editingOrder.note || '') ||
+        this.editOrderData.order_type !== (this.editingOrder.group_id || 'personal')
       );
 
       if (!hasChanges) {
@@ -845,7 +856,8 @@ export default {
               date: this.editingOrder.date,
               meal_type: this.editOrderData.meal_type,
               quantity: this.editOrderData.quantity,
-              note: this.editOrderData.note
+              note: String(this.editOrderData.note || ''),
+              group_id: this.editOrderData.order_type
             })
           });
 

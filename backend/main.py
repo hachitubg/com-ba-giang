@@ -76,6 +76,7 @@ class EditOrderRequest(BaseModel):
     meal_type: str
     quantity: int
     note: str = ""
+    group_id: str = ""
 
 class CancelOrderRequest(BaseModel):
     user_id: int
@@ -405,7 +406,8 @@ async def edit_order(order_id: int, request: EditOrderRequest):
             request.date,
             request.meal_type,
             request.quantity,
-            request.note
+            request.note,
+            request.group_id
         )
         return result
     except Exception as e:

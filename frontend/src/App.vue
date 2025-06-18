@@ -820,6 +820,10 @@
                 <span class="font-medium">{{ order.meal_type }} x{{ order.quantity }}</span>
               </div>
               <div class="flex justify-between">
+                <span class="text-gray-600">Nhóm đặt:</span>
+                <span class="font-medium">{{ order.group_id === 'personal' ? 'Cá nhân' : order.group_id }}</span>
+              </div>
+              <div class="flex justify-between">
                 <span class="text-gray-600">Giờ đặt:</span>
                 <span class="font-medium">{{ order.created_at }}</span>
               </div>
@@ -1337,6 +1341,22 @@
             <p v-if="editingOrder.note"><strong>Ghi chú:</strong> {{ editingOrder.note }}</p>
             <p class="font-semibold text-blue-600"><strong>Tổng tiền:</strong> {{ editingOrder.total_amount.toLocaleString() }} VNĐ</p>
           </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-3">
+            <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+            Đặt cho
+          </label>
+          <select v-model="editOrderData.order_type" 
+                  class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white">
+            <option value="personal">Cá nhân</option>
+            <option v-for="group in currentUser.groups" :key="group.name" :value="group.name">
+              {{ group.name }} ({{ group.members }} người)
+            </option>
+          </select>
         </div>
 
         <!-- Chọn suất cơm -->

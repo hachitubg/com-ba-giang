@@ -1178,7 +1178,9 @@ class ExcelHandler:
                             "note": order['note'] if pd.notna(order['note']) else '',
                             "total_amount": int(order['total_amount']),
                             "status": order['status'],
-                            "created_at": order['created_at']
+                            "created_at": order['created_at'],
+                            # THÊM DÒNG NÀY
+                            "group_id": order['group_id'] if pd.notna(order['group_id']) else 'personal'
                         })
                 except:
                     continue
@@ -1228,9 +1230,11 @@ class ExcelHandler:
             print(f"Error cancelling order: {e}")
             return {"success": False, "message": str(e)}
 
-    def edit_order(self, order_id, user_id, order_date, new_meal_type, new_quantity, new_note):
-        """Edit an existing order"""
+    def edit_order(self, order_id, user_id, order_date, new_meal_type, new_quantity, new_note, new_group_id=None):
+        """Edit an existing order - UPDATED with group_id support"""
         try:
+            print(f"   New Group ID: '{new_group_id}' (type: {type(new_group_id)})")
+
             orders_file = self.data_dir / f"orders_{order_date}.xlsx"
             
             if not orders_file.exists():
@@ -1262,8 +1266,10 @@ class ExcelHandler:
             df.loc[order_mask, 'quantity'] = int(new_quantity)
             df.loc[order_mask, 'note'] = new_note
             df.loc[order_mask, 'total_amount'] = int(new_total_amount)
+            df.loc[order_mask, 'group_id'] = new_group_id
             
             # Save updated order
+            print(f"💾 Saving to file: {orders_file}")
             df.to_excel(orders_file, index=False)
             
             # Adjust payment balance (difference between new and old amount)
