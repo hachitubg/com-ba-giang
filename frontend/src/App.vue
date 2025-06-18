@@ -441,6 +441,305 @@
         </a>
       </div>
     </nav>
+    
+    <!-- Order Modal -->
+    <div v-if="showOrderModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-md transform transition-all duration-300 animate-slide-up">
+        <!-- Modal Header -->
+        <div class="relative p-6 border-b border-gray-100">
+          <div class="text-center">
+            <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-3">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 5M7 13l-1.5-5m0 0L3 3m4 10h10M17 21a2 2 0 11-4 0 2 2 0 014 0zM9 21a2 2 0 11-4 0 2 2 0 014 0z"/>
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-800">Đặt cơm</h3>
+          </div>
+          <button @click="closeOrderModal" 
+                  class="absolute top-4 right-4 w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors">
+            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+        <!-- Modal Body -->
+        <div class="p-6 space-y-6 overflow-y-auto max-h-[60vh]">
+          <!-- Dropdown chọn loại đặt -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-3">
+              <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+              </svg>
+              Đặt cho
+            </label>
+            <select v-model="orderType" 
+                    class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white">
+              <option value="personal">Cá nhân</option>
+              <option v-for="group in currentUser.groups" :key="group.name" :value="group.name">
+                {{ group.name }} ({{ group.members }} người)
+              </option>
+            </select>
+          </div>
+
+          <!-- Tên người đặt -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-3">
+              <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+              </svg>
+              Người đặt
+            </label>
+            <input :value="currentUser.name" disabled 
+                   class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg bg-gray-50 text-gray-600">
+          </div>
+
+          <!-- Chọn suất cơm -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-3">
+              <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+              </svg>
+              Loại cơm
+            </label>
+            <div class="space-y-3">
+              <label v-for="(item, index) in menuItems" :key="index" 
+                     :class="['flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all',
+                              mealType === item.name ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300']">
+                <input v-model="mealType" type="radio" :value="item.name" class="sr-only">
+                <div class="flex items-center justify-between w-full">
+                  <div class="flex items-center">
+                    <div :class="['w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center',
+                                  mealType === item.name ? 'border-blue-500 bg-blue-500' : 'border-gray-300']">
+                      <div v-if="mealType === item.name" class="w-2 h-2 bg-white rounded-full"></div>
+                    </div>
+                    <span class="font-medium text-gray-800">{{ item.name }}</span>
+                  </div>
+                  <span class="font-bold text-blue-600">{{ formatPrice(item.price) }}</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Số lượng -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-3">
+              <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-9 3v10a1 1 0 001 1h8a1 1 0 001-1V7M7 7h10"/>
+              </svg>
+              Số lượng
+            </label>
+            <div class="flex items-center justify-center space-x-6">
+              <button @click="decreaseQuantity" 
+                      class="w-12 h-12 bg-gray-200 hover:bg-gray-300 rounded-xl flex items-center justify-center text-xl font-bold transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                </svg>
+              </button>
+              <span class="text-3xl font-bold text-gray-800 w-16 text-center">{{ quantity }}</span>
+              <button @click="increaseQuantity" 
+                      class="w-12 h-12 bg-blue-500 hover:bg-blue-600 rounded-xl flex items-center justify-center text-xl font-bold text-white transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Ghi chú -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-3">
+              <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+              </svg>
+              Ghi chú topping
+            </label>
+            <textarea v-model="note" 
+                      placeholder="VD: Thêm trứng, không cay..." 
+                      rows="3"
+                      class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg resize-none focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"></textarea>
+          </div>
+
+          <!-- Tổng tiền -->
+          <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-6">
+            <div class="flex justify-between items-center">
+              <span class="text-lg font-semibold text-blue-800">
+                <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+                </svg>
+                Tổng tiền:
+              </span>
+              <span class="text-2xl font-bold text-blue-600">{{ totalAmount.toLocaleString() }} VNĐ</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="p-6 bg-gray-50 rounded-b-3xl">
+          <div class="flex space-x-4">
+            <button @click="closeOrderModal" 
+                    class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-4 rounded-xl transition-colors">
+              Hủy
+            </button>
+            <button @click="submitOrder" 
+                    class="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold py-4 rounded-xl transition-all duration-200 transform hover:scale-105">
+              <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              Đặt cơm ngay
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Group Modal -->
+    <div v-if="showGroupModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-lg max-h-[90vh] overflow-hidden">
+        <!-- Modal Header -->
+        <div class="relative p-6 border-b border-gray-100">
+          <div class="text-center">
+            <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-3">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-800">Quản lý nhóm</h3>
+          </div>
+          <button @click="closeGroupModal" 
+                  class="absolute top-4 right-4 w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors">
+            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="flex bg-gray-50 border-b border-gray-200">
+          <button @click="groupTab = 'join'" 
+                  :class="['flex-1 py-4 text-sm font-semibold transition-colors',
+                           groupTab === 'join' ? 'text-blue-600 bg-white border-b-2 border-blue-500' : 'text-gray-500 hover:text-gray-700']">
+            <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            Tham gia
+          </button>
+          <button @click="groupTab = 'create'" 
+                  :class="['flex-1 py-4 text-sm font-semibold transition-colors',
+                           groupTab === 'create' ? 'text-blue-600 bg-white border-b-2 border-blue-500' : 'text-gray-500 hover:text-gray-700']">
+            <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            </svg>
+            Tạo nhóm
+          </button>
+          <button @click="groupTab = 'manage'" 
+                  :class="['flex-1 py-4 text-sm font-semibold transition-colors',
+                           groupTab === 'manage' ? 'text-blue-600 bg-white border-b-2 border-blue-500' : 'text-gray-500 hover:text-gray-700']">
+            <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            </svg>
+            Quản lý
+          </button>
+        </div>
+
+        <!-- Modal Content with scroll -->
+        <div class="p-6 overflow-y-auto max-h-96">
+          <!-- Join Group Tab -->
+          <div v-if="groupTab === 'join'" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Mã nhóm</label>
+              <div class="flex space-x-2">
+                <input v-model="joinGroupCode" type="text" placeholder="VD: IT2025, MKT001..." 
+                       class="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button @click="joinGroup" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors whitespace-nowrap">
+                  Tham gia
+                </button>
+              </div>
+            </div>
+            <div class="text-center text-gray-500 text-sm">
+              Liên hệ trưởng nhóm để lấy mã nhóm
+            </div>
+          </div>
+
+          <!-- Create Group Tab -->
+          <div v-if="groupTab === 'create'" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Tên nhóm</label>
+              <input v-model="newGroup.name" type="text" placeholder="VD: IT Team, Marketing Team..." 
+                     class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Địa chỉ giao hàng</label>
+              <input v-model="newGroup.address" type="text" placeholder="VD: Tầng 5, Tòa nhà ABC..." 
+                     class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <!-- Benefits Info (compact) -->
+            <div class="bg-green-50 border border-green-200 rounded-lg p-3">
+              <h4 class="font-medium text-green-800 text-sm mb-1">💡 Lợi ích trưởng nhóm:</h4>
+              <p class="text-green-700 text-xs">Giảm giá 5-10k/suất • Miễn phí khi ≥20 người • Giao hàng tập trung</p>
+            </div>
+
+            <button @click="createGroup" class="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 rounded-lg transition-colors">
+              Tạo nhóm ngay
+            </button>
+          </div>
+
+          <!-- Manage Groups Tab -->
+          <div v-if="groupTab === 'manage'">
+            <div v-if="currentUser.groups.length === 0" class="text-center text-gray-500 py-8">
+              <p class="text-sm">Bạn chưa tham gia nhóm nào</p>
+              <button @click="groupTab = 'join'" class="text-blue-500 hover:text-blue-600 text-sm mt-2">
+                Tham gia nhóm ngay
+              </button>
+            </div>
+            <div v-else class="space-y-3 max-h-64 overflow-y-auto">
+              <div v-for="group in currentUser.groups" :key="group.name" 
+                   class="border border-gray-200 rounded-lg p-3">
+                <div class="flex justify-between items-start mb-2">
+                  <div>
+                    <h5 class="font-medium text-gray-800 text-sm">{{ group.name }}</h5>
+                    <p class="text-xs text-gray-600" v-if="group.isLeader">👑 Trưởng nhóm</p>
+                    <p class="text-xs text-gray-600" v-else>👤 Thành viên</p>
+                  </div>
+                  <!-- Hiển thị button khác nhau cho leader vs member -->
+                  <button v-if="group.isLeader" 
+                          @click="goToGroupManagement(group)" 
+                          class="text-xs px-3 py-1">
+                    Quản lý
+                  </button>
+                  <button v-else 
+                          @click="leaveGroup(group.name)" 
+                          class="text-red-500 hover:text-red-600 text-xs">
+                    Rời nhóm
+                  </button>
+                </div>
+                
+                <!-- Group Code (chỉ leader) -->
+                <div v-if="group.isLeader" class="bg-blue-50 rounded-lg p-2 mb-2">
+                  <div class="flex justify-between items-center">
+                    <div>
+                      <p class="text-xs text-blue-700 font-medium">Mã: {{ group.code }}</p>
+                      <p class="text-xs text-blue-600">Chia sẻ để mọi người tham gia</p>
+                    </div>
+                    <button @click="copyGroupCode(group.code)" 
+                            class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded">
+                      Copy
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Group Stats -->
+                <div class="flex justify-between text-xs text-gray-500">
+                  <span>{{ group.members }} thành viên</span>
+                  <span v-if="group.isLeader">{{ group.totalOrders || 0 }} đơn tuần này</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <!-- Order History Modal -->

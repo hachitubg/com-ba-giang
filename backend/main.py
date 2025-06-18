@@ -23,25 +23,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# API Deploy check
-@app.get("/api/health")
-async def health_check():
-    return {"status": "healthy", "message": "Backend API is working!"}
-
-@app.get("/api/debug")
-async def debug_static():
-    static_dir = Path(__file__).parent / "static"
-    return {
-        "static_exists": static_dir.exists(),
-        "static_path": str(static_dir),
-        "files": [f.name for f in static_dir.iterdir()] if static_dir.exists() else []
-    }
-
-# API routes
-@app.get("/api/health")
-async def health_check():
-    return {"status": "healthy"}
-
 # Initialize Excel handler
 excel_handler = ExcelHandler()
 
