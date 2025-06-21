@@ -1919,8 +1919,8 @@ class ExcelHandler:
                 "orderCode": order_code,
                 "amount": amount,
                 "description": description,
-                "returnUrl": "https://yourdomain.com/return",
-                "cancelUrl": "https://yourdomain.com/cancel"
+                "returnUrl": "https://com-ba-giang.onrender.com/payment/success",
+                "cancelUrl": "https://com-ba-giang.onrender.com/payment/cancel"
             }
             
             # Create signature (copy từ test)

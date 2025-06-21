@@ -1,3 +1,6 @@
+import { API_CONFIG } from '../../config/api.js'
+const API_BASE_URL = API_CONFIG.BASE_URL
+
 export default {
   name: 'GroupManagement',
   data() {
@@ -181,8 +184,7 @@ export default {
           this.showNotification('Thiếu Group ID để tải thành viên', 'error');
           return;
         }
-        
-        const url = `http://127.0.0.1:8000/groups/${this.groupInfo.id}/members`;
+        const url = `${API_BASE_URL}/groups/${this.groupInfo.id}/members`;
         
         const response = await fetch(url);
         const result = await response.json();
@@ -243,7 +245,7 @@ export default {
           return;
         }
         
-        const response = await fetch(`http://127.0.0.1:8000/groups/${this.groupInfo.id}/members/${this.memberToDelete.id}`, {
+        const response = await fetch(`${API_BASE_URL}/groups/${this.groupInfo.id}/members/${this.memberToDelete.id}`, {
           method: 'DELETE'
         });
         
@@ -279,7 +281,7 @@ export default {
           return;
         }
         
-        const response = await fetch(`http://127.0.0.1:8000/groups/${this.groupInfo.id}/orders`);
+        const response = await fetch(`${API_BASE_URL}/groups/${this.groupInfo.id}/orders`);
         const result = await response.json();
         
         if (result.success) {
@@ -360,7 +362,7 @@ export default {
           return;
         }
         
-        const response = await fetch(`http://127.0.0.1:8000/groups/${this.groupInfo.id}/payments?period=${this.paymentFilter}`);
+        const response = await fetch(`${API_BASE_URL}/groups/${this.groupInfo.id}/payments?period=${this.paymentFilter}`);
         const result = await response.json();
         
         if (result.success) {

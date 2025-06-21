@@ -891,173 +891,6 @@ async def delete_feedback(feedback_id: int):
     result = excel_handler.delete_feedback(feedback_id)
     return result
 
-# ============ TEST & DEVELOPMENT ENDPOINTS ============
-@app.post("/payments/test-payos-webhook")
-async def test_payos_webhook(order_code: int):
-    """Test endpoint để simulate PayOS webhook (chỉ dùng trong development)"""
-    try:
-        # Tạo fake webhook data
-        fake_webhook_data = {
-            "code": "00",
-            "desc": "success",
-            "success": True,
-            "data": {
-                "orderCode": order_code,
-                "amount": 150000,  # Test amount
-                "description": "Test payment",
-                "accountNumber": "12345678",
-                "reference": f"TEST{random.randint(100000, 999999)}",
-                "transactionDateTime": "2025-06-01 14:30:00",
-                "currency": "VND",
-                "paymentLinkId": f"test_payment_link_{order_code}",
-                "code": "00",
-                "desc": "Thành công"
-            },
-            "signature": "test_signature_for_development"
-        }
-        
-        # For now, just return success
-        return {
-            "success": True,
-            "message": "Test webhook sent successfully",
-            "webhook_data": fake_webhook_data
-        }
-        
-    except Exception as e:
-        print(f"❌ Test PayOS webhook error: {e}")
-        return {"success": False, "message": "Test webhook failed"}
-
-@app.post("/test/payos-webhook")
-async def test_payos_webhook_locally(test_data: dict):
-    """Test endpoint để simulate PayOS webhook locally (development only)"""
-    try:
-        # Get test parameters
-        order_code = test_data.get('order_code')
-        success = test_data.get('success', True)
-        amount = test_data.get('amount', 100000)
-        
-        if not order_code:
-            return {"success": False, "message": "Missing order_code in test data"}
-        
-        # Create mock webhook data
-        mock_webhook = {
-            "code": "00" if success else "01",
-            "desc": "success" if success else "failed",
-            "success": success,
-            "data": {
-                "orderCode": order_code,
-                "amount": amount,
-                "description": f"Test payment for order {order_code}",
-                "accountNumber": "1234567890",
-                "reference": f"TEST{random.randint(100000, 999999)}",
-                "transactionDateTime": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                "currency": "VND",
-                "paymentLinkId": f"test_link_{order_code}",
-                "code": "00" if success else "01",
-                "desc": "Thành công" if success else "Thất bại"
-            },
-            "signature": "test_signature_development_only"
-        }
-        
-        # Process mock webhook
-        result = excel_handler.process_payos_webhook(mock_webhook)
-        
-        return {
-            "success": True,
-            "message": "Test webhook processed",
-            "mock_webhook": mock_webhook,
-            "processing_result": result
-        }
-        
-    except Exception as e:
-        print(f"❌ Test webhook error: {e}")
-        return {"success": False, "message": f"Test webhook failed: {str(e)}"}
-
-@app.get("/test/payos-direct")
-async def test_payos_direct():
-    """Test PayOS API call trực tiếp"""
-    try:
-        import requests
-        import json
-        import hmac
-        import hashlib
-        
-        # PayOS credentials
-        client_id = excel_handler.PAYOS_CLIENT_ID
-        api_key = excel_handler.PAYOS_API_KEY
-        checksum_key = excel_handler.PAYOS_CHECKSUM_KEY
-        
-        # Create test payment request
-        test_order = {
-            "orderCode": 123456789,
-            "amount": 50000,
-            "description": "Test Payment CBG",
-            "returnUrl": "https://yourdomain.com/return",
-            "cancelUrl": "https://yourdomain.com/cancel"
-        }
-        
-        # Create signature
-        sorted_keys = sorted(test_order.keys())
-        data_string = "&".join([f"{key}={test_order[key]}" for key in sorted_keys])
-        
-        signature = hmac.new(
-            checksum_key.encode('utf-8'),
-            data_string.encode('utf-8'),
-            hashlib.sha256
-        ).hexdigest()
-        
-        test_order["signature"] = signature
-        
-        # Headers
-        headers = {
-            "x-client-id": client_id,
-            "x-api-key": api_key,
-            "Content-Type": "application/json"
-        }
-        
-        # Make request
-        response = requests.post(
-            "https://api-merchant.payos.vn/v2/payment-requests",
-            headers=headers,
-            json=test_order,
-            timeout=30
-        )
-        
-        if response.status_code == 200:
-            data = response.json()
-            return {
-                "success": True,
-                "status_code": response.status_code,
-                "response": data,
-                "has_qr": bool(data.get('data', {}).get('qrCode')),
-                "has_url": bool(data.get('data', {}).get('checkoutUrl')),
-                "qr_length": len(data.get('data', {}).get('qrCode', '')),
-                "checkout_url": data.get('data', {}).get('checkoutUrl', '')
-            }
-        else:
-            return {
-                "success": False,
-                "status_code": response.status_code,
-                "error": response.text,
-                "possible_issues": [
-                    "Invalid credentials",
-                    "Account not activated", 
-                    "Wrong environment (sandbox vs production)",
-                    "Invalid request format"
-                ]
-            }
-            
-    except Exception as e:
-        print(f"❌ Direct test error: {e}")
-        import traceback
-        traceback.print_exc()
-        
-        return {
-            "success": False,
-            "error": str(e),
-            "error_type": type(e).__name__
-        }
-    
 # ============ OPTIONS HANDLERS FOR PREFLIGHT REQUESTS ============
 @app.options("/payments/create-payos")
 async def options_create_payos():
@@ -1100,6 +933,16 @@ async def options_group_payments(group_identifier: str):
 @app.options("/groups/{group_id}/invite")
 async def options_group_invite(group_id: int):
     return {"message": "OK"}
+
+@app.get("/payment/success")
+async def payment_success():
+    """PayOS return URL - thanh toán thành công"""
+    return FileResponse(str(static_dir / "index.html"))
+
+@app.get("/payment/cancel") 
+async def payment_cancel():
+    """PayOS cancel URL - hủy thanh toán"""
+    return FileResponse(str(static_dir / "index.html"))
 
 # =============
 # SERVE FRONTEND STATIC FILES

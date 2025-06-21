@@ -340,7 +340,7 @@ export default {
       }
       
       try {
-        const response = await fetch(`http://127.0.0.1:8000/admin/orders/${order.id}/status/${order.date}`, {
+        const response = await fetch(`${API_BASE_URL}/admin/orders/${order.id}/status/${order.date}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -603,7 +603,7 @@ export default {
     async markAsPaid(userId, amount) {
       if (confirm(`Xác nhận đã nhận thanh toán ${amount.toLocaleString()}k từ khách hàng?`)) {
         try {
-          const response = await fetch(`http://127.0.0.1:8000/admin/payments/${userId}/mark-paid`, {
+          const response = await fetch(`${API_BASE_URL}/admin/payments/${userId}/mark-paid`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -633,7 +633,7 @@ export default {
     
     async viewPaymentHistory(userId) {
       try {
-        const response = await fetch(`http://127.0.0.1:8000/admin/payments/${userId}/history`);
+        const response = await fetch(`${API_BASE_URL}/admin/payments/${userId}/history`);
         const result = await response.json();
         
         const user = this.payments.find(p => p.user_id === userId);
@@ -711,7 +711,7 @@ export default {
       const group = this.allGroups.find(g => g.id === groupId);
       if (group && confirm(`Bạn có chắc muốn xóa nhóm "${group.name}"?\nLưu ý: Thao tác này không thể hoàn tác!`)) {
         try {
-          const response = await fetch(`http://127.0.0.1:8000/admin/groups/${groupId}`, {
+          const response = await fetch(`${API_BASE_URL}/admin/groups/${groupId}`, {
             method: 'DELETE'
           });
           
@@ -820,7 +820,7 @@ export default {
 
     async markFeedbackAsRead(feedbackId) {
       try {
-        const response = await fetch(`http://127.0.0.1:8000/admin/feedback/${feedbackId}/status`, {
+        const response = await fetch(`${API_BASE_URL}/admin/feedback/${feedbackId}/status`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -849,7 +849,7 @@ export default {
     async markFeedbackAsResolved(feedbackId) {
       if (confirm('Xác nhận đã xử lý góp ý này?')) {
         try {
-          const response = await fetch(`http://127.0.0.1:8000/admin/feedback/${feedbackId}/status`, {
+          const response = await fetch(`${API_BASE_URL}/admin/feedback/${feedbackId}/status`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -880,7 +880,7 @@ export default {
     async deleteFeedback(feedbackId) {
       if (confirm('Bạn có chắc muốn xóa góp ý này? Thao tác này không thể hoàn tác!')) {
         try {
-          const response = await fetch(`http://127.0.0.1:8000/admin/feedback/${feedbackId}`, {
+          const response = await fetch(`${API_BASE_URL}/admin/feedback/${feedbackId}`, {
             method: 'DELETE'
           });
           
