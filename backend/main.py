@@ -604,21 +604,11 @@ async def create_payos_payment(request: CreatePayOSPaymentRequest):
 async def check_payos_payment_status(order_code: int):
     """Kiểm tra trạng thái thanh toán PayOS - SAFE VERSION"""
     try:
-        print(f"🔍 CHECK PAYOS STATUS REQUEST:")
-        print(f"   Order Code: {order_code}")
-        
         # Basic validation
         if not order_code:
             return {"success": False, "message": "Missing order_code"}
         
         result = excel_handler.check_payos_payment_status(order_code)
-        
-        print(f"📊 STATUS CHECK RESULT: {result.get('success', False)}")
-        if result.get('success'):
-            print(f"   Status: {result.get('status', 'Unknown')}")
-        else:
-            print(f"❌ Error: {result.get('message', 'Unknown error')}")
-        
         return result
         
     except Exception as e:

@@ -1082,13 +1082,13 @@
             </button>
 
             <!-- Manual Payment Button -->
-            <button @click="markManualPayment" 
+            <!-- <button @click="markManualPayment" 
                     class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 rounded-xl transition-colors">
               <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
               </svg>
               Đã thanh toán bằng cách khác
-            </button>
+            </button> -->
 
             <p class="text-center text-xs text-gray-500">
               💡 PayOS: Tự động cập nhật • Manual: Cần xác nhận thủ công

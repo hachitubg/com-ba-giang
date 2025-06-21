@@ -10,6 +10,10 @@ import hmac
 from datetime import datetime, date, timedelta
 from pathlib import Path
 from openpyxl.styles import Alignment
+from dotenv import load_dotenv
+
+# LOAD .ENV FILE
+load_dotenv()
 
 # ============ EXCEL HANDLER CLASS ============
 class ExcelHandler:
@@ -22,7 +26,7 @@ class ExcelHandler:
         self.PAYOS_API_KEY = os.getenv("PAYOS_API_KEY")  
         self.PAYOS_CHECKSUM_KEY = os.getenv("PAYOS_CHECKSUM_KEY")
         self.PAYOS_BASE_URL = "https://api-merchant.payos.vn"
-
+        
         self.init_excel_files()
 
 # ============ FILE INITIALIZATION ============
